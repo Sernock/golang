@@ -1,31 +1,139 @@
+/*
+Learning basic concepts of golang
+*/
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+type gasEngine struct {
+	mpg     uint8
+	gallons uint8
+	owner   carOwner
+}
+
+type electricEngine struct {
+	mpkwh uint8
+	kwk   uint8
+}
+
+func (e gasEngine) milesLeft() uint8 { // method for struct
+	return e.gallons * e.mpg
+}
+
+func (e electricEngine) milesLeft() uint8 {
+	return e.kwk * e.mpkwh
+}
+
+type engine interface {
+	milesLeft() uint8
+}
+
+func canMakeIt(e engine, miles uint8) {
+	if miles <= e.milesLeft() {
+		fmt.Println("You can make it ther!")
+	} else {
+		fmt.Println("Nedd to fuel up first!")
+	}
+}
+
+type carOwner struct {
+	name string
+}
 
 func main() {
-    var count int
-    fmt.Scan(&count)
+	var intNum int = 32767
+	intNum++
+	fmt.Println(intNum)
 
-    numbers := make([]int, count)
-    for i := 0; i < count; i++ {
-        fmt.Scan(&numbers[i])
-    }
+	var floatNum float64 = 12345678.9
+	fmt.Println(floatNum)
 
-    flag := 1 
-    i, j := 0, count-1
+	var numerator int = 11
+	var denominator int = 2
+	var result, remainder, err = intDevision(numerator, denominator)
 
-    for i < j {
-        if numbers[i] != numbers[j] {
-            flag = 0
-            break
-        }
-        i++
-        j--
-    }
+	if err != nil {
+		fmt.Printf(err.Error())
+	} else if remainder == 0 {
+		fmt.Printf("The result of the integer devision is %v\n", result)
+	} else {
+		fmt.Printf("The result is %v, the reminder is %v\n", result, remainder)
+	}
 
-    if flag == 1 {
-        fmt.Println("YES")
-    } else {
-        fmt.Println("NO")
-    }
+	var intArr [3]int32 = [...]int32{123, 56, 78}
+	fmt.Println(intArr[0:])
+	fmt.Println(len(intArr))
+
+	var intSlice []int16 = make([]int16, 3, 10)
+	fmt.Println(intSlice)
+	intSlice = append(intSlice, 7)
+
+	var myMap map[string]uint8 = map[string]uint8{"James": 23, "Kirk": 52}
+	fmt.Println(myMap["James"])
+
+	var res, ok = myMap["Flea"]
+	if !ok {
+		fmt.Println("Error: there is no such key")
+	} else {
+		fmt.Println(res)
+	}
+	delete(myMap, "Kirk")
+
+	myMap["John"] = 63
+	for name, age := range myMap {
+		fmt.Printf("Name: %v, age: %v\n", name, age)
+	}
+
+	myArray := [10]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	for _, val := range myArray {
+		if val%2 == 0 {
+			fmt.Println(val)
+		}
+	}
+
+	myString := "こんにちは世界 🌍🚀"
+	fmt.Println(len(myString)) // len is bytes
+	myRune := []rune(myString)
+	fmt.Println(len(myRune))     // len in runes
+	fmt.Print(string(myRune[2])) // for graphic vizualization in terminal
+
+	var myEngine gasEngine = gasEngine{mpg: 25, gallons: 15, owner: carOwner{"Diddy"}}
+	fmt.Println(myEngine.mpg, myEngine.gallons, myEngine.owner.name)
+
+	var myEngine2 = struct { // anon struct
+		mpg     uint8
+		gallons uint8
+	}{23, 34}
+	fmt.Println(myEngine2.mpg, myEngine2.gallons)
+
+	fmt.Printf("Total miles left in tank: %v", myEngine.milesLeft())
+
+	canMakeIt(myEngine, 50)
+
+	var i int32 = 78
+	var p *int32 = &i
+	fmt.Println(*p)
+
+	var slice = []int32{1, 2, 3}
+	var sliceCopy = slice
+	sliceCopy[2] = 3
+	fmt.Println(slice)
+	fmt.Println(sliceCopy)
+
+	
+}
+
+func intDevision(numerator int, denominator int) (int, int, error) {
+	var err error
+
+	if denominator == 0 {
+		err = errors.New("Cannot devide by zero")
+		return 0, 0, err
+	}
+	var result int = numerator / denominator
+	var remainder int = numerator % denominator
+	return result, remainder, err
 }
