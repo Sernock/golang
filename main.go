@@ -1,44 +1,34 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"fmt"
-	"sync"
-	"time"
+	"log"
+	"math"
 )
 
-var m = sync.RWMutex{}
-var wg = sync.WaitGroup{}
-var dbData = []string{"id1", "id2", "id3", "id4", "id5"}
-var results = []string{}
+// TODO
 
 func main() {
-	t0 := time.Now()
-	for i := 0; i < len(dbData); i++ {
-		wg.Add(1)
-		go dbCall(i)
+	f, err := randomFLoat(4, 6)
+	if err != nil {
+		log.Fatalf("Ошибка генерации случайного значения: %s", err.Error())
 	}
-	wg.Wait()
-	fmt.Printf("\nTotal execution time: %v", time.Since(t0))
-	fmt.Printf("\nThe result are %v", results)
+
+	fmt.Println("Случайное число", f)
 }
 
-func dbCall(i int) {
-	// simulate db call delay
-	var delay float32 = 2000
-	time.Sleep(time.Duration(delay) * time.Millisecond)
-	save(dbData[i])
-	log()
-	wg.Done()
-}
+func randomFLoat(min, max float64) (float64, error) {
+	b := make([]byte, 8)
+	_, err := rand.Read(b)
+	if err != nil {
+		return 0, err
+	}
 
-func save(result string) {
-	m.Lock()
-	results = append(results, result)
-	m.Unlock()
-}
+	num := binary.BigEndian.Uint64(b)
 
-func log() {
-	m.RLock()
-	fmt.Printf("\nThe current results are: %v", results)
-	m.RUnlock()
+	f := float64(num) / float64(math.MaxUint64)
+
+	return min + f*(max-min), nil
 }
